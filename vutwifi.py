@@ -8,8 +8,24 @@ url = 'https://wifigw.cis.vutbr.cz/login.php'
 headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
 }
+config_file_path = os.path.expanduser('~/.vutwifi.conf')
 
-def status():
+def check_user(user, password):
+    if not user or not password:
+        if not user:
+            user = input('Username: ')
+        if not password:
+            password = input('Password: ')
+
+        try:
+            with open(config_file_path, 'x') as fp:
+                fp.write('user={}\npassword={}'.format(user, password))
+        except FileExistsError:
+            print('Config file is invalid. Please set valid user and password.')
+
+    return user, password
+
+def status(user=None, password=None):
     '''
     Check whether you are connected to the internet.
 
@@ -27,11 +43,9 @@ def connect(user=None, password=None):
     :param user: Internet access user name
     :param password: Internet access user name
     '''
-    if not user:
-        user = input('Username: ')
-    if not password:
-        password = input('Password: ')
-    requests.post(url, headers=headers,
+    user, password = check_user(user, password)
+
+    r = requests.post(url, headers=headers,
                   data='user=%s&auth=any&password=%s' % (user, password))
 
 def disconnect():
@@ -67,7 +81,7 @@ def watch(user=None, password=None, n: int=60, verbose=False):
 
 def main():
     horetu.cli([connect, disconnect, status, watch],
-               config_file=os.path.expanduser('~/.vutwifi.conf'))
+               config_file=config_file_path)
 
 if __name__ == '__main__':
     main()
