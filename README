@@ -10,4 +10,23 @@ Run ::
 
     vutwifi connect
 
+We recommend that you create a configuration file in ``~/.vutwifi.conf``,
+like this.
+
+::
+
+    user = pycon
+    password = pyconcz2015wifi
+
+Alternatively, you may set the user and password on the command line. ::
+
+    vutwifi connect -user pycon -password pyconcz2015wifi
+
+If you do neither of these, ``vutwifi`` will prompt for the user and
+password. ::
+
+    vutwifi connect
+    Username: pycon
+    Password: pyconcz2015wifi
+
 Note: vutwifi requires Python version 3.3 or higher.
