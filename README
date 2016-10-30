@@ -16,17 +16,17 @@ like this.
 ::
 
     user = pycon
-    password = pyconcz2015wifi
+    password = pycon2015cz
 
 Alternatively, you may set the user and password on the command line. ::
 
-    vutwifi connect -user pycon -password pyconcz2015wifi
+    vutwifi connect -user pycon -password pycon2015cz
 
 If you do neither of these, ``vutwifi`` will prompt for the user and
 password. ::
 
     vutwifi connect
     Username: pycon
-    Password: pyconcz2015wifi
+    Password: pycon2015cz
 
 Note: vutwifi requires Python version 3.3 or higher.
