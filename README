@@ -1,0 +1,13 @@
+vutwifi
+===============
+Connect to WIFI at FIT VUT in Brno.
+
+Install ::
+
+    pip install pyconcz2016wifi
+
+Run ::
+
+    pyconcz2016wifi connect
+
+Note: pyconcz2016wifi requires Python version 3.3 or higher.
