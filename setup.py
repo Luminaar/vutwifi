@@ -1,9 +1,9 @@
 from distutils.core import setup
 
 setup(name='vutwifi',
-      author='Thomas Levine',
-      author_email='_@thomaslevine.com',
-      description='Connect to the internet at .',
+      author='Thomas Levine, Max K. Luminar',
+      author_email='kovykmax@gmail.com',
+      description='Connect to the WIFI at FIT VUT in Brno.',
       url='',
       py_modules=['vutwifi'],
       install_requires=[
