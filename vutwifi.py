@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import time
 import requests
 import horetu
@@ -11,6 +12,9 @@ headers = {
 def status():
     '''
     Check whether you are connected to the internet.
+
+    :param user: Internet access user name
+    :param password: Internet access user name
     '''
     r = requests.get(url, headers=headers)
     connected = 'input type="password"' not in r.text
@@ -57,7 +61,7 @@ def watch(user=None, password=None, n=60, verbose=False):
 
 def main():
     horetu.cli([connect, disconnect, status, watch],
-               config=os.path.expand('~/.vutwifi.conf'))
+               config_file=os.path.expanduser('~/.vutwifi.conf'))
 
 if __name__ == '__main__':
     main()
