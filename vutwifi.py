@@ -1,87 +1,103 @@
-#!/usr/bin/env python3
-import os
+import json
 import time
+from pathlib import Path
+
+import click
 import requests
-import horetu
 
-url = 'https://wifigw.cis.vutbr.cz/login.php'
-headers = {
-    'Content-Type': 'application/x-www-form-urlencoded',
+URL = "https://wifigw.cis.vutbr.cz/login.php"
+HEADERS = {
+    "Content-Type": "application/x-www-form-urlencoded",
 }
-config_file_path = os.path.expanduser('~/.vutwifi.conf')
+CONFIG_FILE_PATH = Path.home() / ".vutwifi.conf"
 
-def check_user(user, password):
-    if not user or not password:
-        if not user:
-            user = input('Username: ')
-        if not password:
-            password = input('Password: ')
 
+def check_user(user=None, password=None):
+    """Check if 'user' in 'password' are set. If not, get them from user
+    input."""
+
+    if CONFIG_FILE_PATH.exists():
+        content = CONFIG_FILE_PATH.read_text()
         try:
-            with open(config_file_path, 'x') as fp:
-                fp.write('user={}\npassword={}'.format(user, password))
-        except FileExistsError:
-            print('Config file is invalid. Please set valid user and password.')
+            config = json.loads(content)
+            user = config.get("user")
+            password = config.get("password")
+        except json.decoder.JSONDecodeError:
+            pass
+
+    if not user or not password:
+
+        if not user:
+            user = input("Username: ")
+        if not password:
+            password = input("Password: ")
+
+        CONFIG_FILE_PATH.write_text(json.dumps({"user": user, "password": password}))
 
     return user, password
 
-def status(user=None, password=None):
-    '''
-    Check whether you are connected to the internet.
 
-    :rtype: str
-    :returns: "connected" or "not connected"
-    '''
-    r = requests.get(url, headers=headers)
-    connected = 'input type="password"' not in r.text
-    return {True:'connected', False:'not connected'}[connected]
+@click.group()
+def cli():
+    pass
 
-def connect(user=None, password=None):
-    '''
-    Connect to the internet.
 
-    :param user: Internet access user name
-    :param password: Internet access user name
-    '''
+def is_connected():
+    """Check whether you are connected to the internet.
+
+    Return True if connected, False otherwise."""
+
+    resp = requests.get(URL, headers=HEADERS)
+    return 'input type="password"' not in resp.text
+
+
+@cli.command(help="Check whether you are connected to the VUT WiFi")
+def status():
+    """Check whether you are connected to the internet.
+
+    Return True if connected, False otherwise."""
+
+    if is_connected():
+        print("You are connected")
+    else:
+        print("You are disconnected")
+
+
+def _connect(user, password):
+
+    requests.post(
+        URL, headers=HEADERS, data="user=%s&auth=any&password=%s" % (user, password)
+    )
+
+
+@cli.command(help="Connect to VUT Wifi")
+def connect():
+    user, password = check_user()
+
+    _connect(user, password)
+
+
+@cli.command(help="Disconnect from VUT Wifi")
+def disconnect():
+    requests.post(URL, headers=HEADERS, data="logout=1")
+
+
+@cli.command(help="Check for connection periodically and reconnect if needed")
+def watch(user=None, password=None, interval: int = 30):
+    """Poll the internet connection periodically and reconnect if the
+    connection is down.
+    """
+
     user, password = check_user(user, password)
 
-    r = requests.post(url, headers=headers,
-                  data='user=%s&auth=any&password=%s' % (user, password))
-
-def disconnect():
-    '''
-    Disconnect from the internet.
-    '''
-    requests.post(url, headers=headers, data='logout=1')
-
-def watch(user=None, password=None, n: int=60, verbose=False):
-    '''
-    Poll the internet connection periodically, and reconnect if the
-    connection is down.
-
-    :param user: Internet access user name
-    :param password: Internet access user name
-    :param n: Seconds to sleep
-    :param verbose: Turn on verbose output
-    '''
-    if not user:
-        user = input('Username: ')
-    if not password:
-        password = input('Password: ')
     while True:
         try:
-            s = status()
-            if verbose:
-                print(s)
-            if s == 'not connected':
-                connect(user=user, password=password)
-            time.sleep(n)
+            if not is_connected():
+                print("Reconnecting")
+                _connect(user, password)
+            else:
+                print("Connected")
+
+            time.sleep(interval)
         except KeyboardInterrupt:
             break
-
-def main():
-    horetu.cli([connect, disconnect, status, watch],
-               config_file=config_file_path)
-
-if __name__ == '__main__':
-    main()
