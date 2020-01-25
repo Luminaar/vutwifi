@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from os import path
 
@@ -14,7 +14,7 @@ setup(
     url="https://github.com/luminaar/vutwifi",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    py_modules=["vutwifi"],
+    packages=find_packages(),
     install_requires=["requests>=2.22, <3.0", "click>=7.0, <8.0",],
     classifiers=[
         "Programming Language :: Python :: 3.5",
@@ -22,7 +22,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    entry_points={"console_scripts": ["vutwifi = vutwifi:cli"]},
-    version="0.3",
+    entry_points={"console_scripts": ["vutwifi = vutwifi.vutwifi:cli"]},
+    version="0.3.1",
     license="AGPL",
 )
